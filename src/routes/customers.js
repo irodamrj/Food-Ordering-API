@@ -8,6 +8,7 @@ const {
   getCart,
   resetCart,
   createCart,
+  changePassword,
 } = require('../controllers/customers');
 
 router.get('/', getProfile);
@@ -16,5 +17,6 @@ router.delete('/', deleteProfile);
 router.get('/cart', getCart);
 router.patch('/cart', resetCart);
 router.post('/cart', createCart);
+router.post('/changePassword', changePassword);
 
 module.exports = router;

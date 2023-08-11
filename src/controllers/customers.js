@@ -129,6 +129,38 @@ const createCart = async (req, res) => {
   return res.status(StatusCodes.OK).json({ updatedCustomer });
 };
 
+const changePassword = async (req, res) => {
+  const { password, newPassword1, newPasswordAgain } = req.body;
+  const customer = await CustomerModel.findOne({ email: req.auth.email });
+  if (customer.providerId) {
+    throw new CustomError.BadRequestError(
+      'Cannot change password, since customer signed in using Identity provider services.'
+    );
+  }
+  if (!password || !newPassword1 || !newPasswordAgain) {
+    throw new CustomError.BadRequestError(
+      'Password, new password and confirmation of new password cannot be empty.'
+    );
+  }
+  if (newPassword1 === newPasswordAgain) {
+    throw new CustomError.BadRequestError(
+      'Password, new password and confirmation of new password cannot be empty.'
+    );
+  }
+  const isValid = await bcrypt.compare(password, customer.password);
+  if (!isValid) {
+    throw new CustomError.BadRequestError('Invalid password.');
+  }
+
+  const newHashedPassword = await bcrypt.hash(newPassword1, 10);
+  await CustomerModel.findOneAndUpdate(
+    { email: req.auth.email },
+    { password: newHashedPassword },
+    { new: true }
+  );
+  return res.status(StatusCodes.OK).json('Password updated successfully.');
+};
+
 module.exports = {
   getProfile,
   updateProfile,
@@ -136,4 +168,5 @@ module.exports = {
   getCart,
   resetCart,
   createCart,
+  changePassword,
 };

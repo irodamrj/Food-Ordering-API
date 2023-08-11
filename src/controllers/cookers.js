@@ -1,4 +1,5 @@
 const { StatusCodes } = require('http-status-codes');
+const bcrypt = require('bcryptjs');
 const CustomError = require('../errors');
 const Cooker = require('../models/cooker');
 const Order = require('../models/order');
@@ -85,8 +86,10 @@ const updateAnOrdersStatus = async (req, res) => {
     throw new CustomError.NotFoundError(`Order with Id ${orderId} not found`);
   }
 
-  if(order.status == "Cancelled"){
-    return res.status(StatusCodes.BAD_REQUEST).json("This order is cancelled.  Cannot be Delivered.")
+  if (order.status == 'Cancelled') {
+    return res
+      .status(StatusCodes.BAD_REQUEST)
+      .json('This order is cancelled.  Cannot be Delivered.');
   }
 
   await Order.findByIdAndUpdate(
@@ -97,9 +100,7 @@ const updateAnOrdersStatus = async (req, res) => {
 
   return res
     .status(StatusCodes.OK)
-    .json(
-      `status of the order with Id ${orderId} is updated to Delivered.`
-    );
+    .json(`status of the order with Id ${orderId} is updated to Delivered.`);
 };
 
 const createDish = async (req, res) => {
@@ -171,6 +172,33 @@ const setPaymentType = async (req, res) => {
     );
 };
 
+const changePassword = async (req, res) => {
+  const { password, newPassword1, newPasswordAgain } = req.body;
+  const cooker = await Cooker.findOne({ email: req.auth.email });
+  if (!password || !newPassword1 || !newPasswordAgain) {
+    throw new CustomError.BadRequestError(
+      'Password, new password and confirmation of new password cannot be empty.'
+    );
+  }
+  if (newPassword1 === newPasswordAgain) {
+    throw new CustomError.BadRequestError(
+      'Password, new password and confirmation of new password cannot be empty.'
+    );
+  }
+  const isValid = await bcrypt.compare(password, cooker.password);
+  if (!isValid) {
+    throw new CustomError.BadRequestError('Invalid password.');
+  }
+
+  const newHashedPassword = await bcrypt.hash(newPassword1, 10);
+  await Cooker.findOneAndUpdate(
+    { email: req.auth.email },
+    { password: newHashedPassword },
+    { new: true }
+  );
+  return res.status(StatusCodes.OK).json('password updated successfully.');
+};
+
 module.exports = {
   getProfile,
   updateProfile,
@@ -182,4 +210,5 @@ module.exports = {
   getAllDishes,
   updateDish,
   setPaymentType,
+  changePassword,
 };

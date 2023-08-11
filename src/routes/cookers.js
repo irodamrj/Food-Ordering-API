@@ -13,6 +13,7 @@ const {
   getAllDishes,
   updateDish,
   setPaymentType,
+  changePassword,
 } = require('../controllers/cookers');
 
 router.get('/', getProfile);
@@ -25,5 +26,6 @@ router.delete('/dishes/:id', deleteDish);
 router.get('/dishes', getAllDishes);
 router.patch('/dishes/:id', updateDish);
 router.post('/paymentType', setPaymentType);
+router.post('/changePassword', changePassword);
 
 module.exports = router;
