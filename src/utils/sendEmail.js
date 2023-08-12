@@ -1,7 +1,7 @@
 const nodemailer = require('nodemailer');
 require('dotenv').config();
 
-sendEmail = async function (emailAccount, message) {
+const sendEmail = async function (emailAccount, message) {
   const to = 'gogohatiko@gmail.com';
   const smtpTransport = nodemailer.createTransport({
     service: 'Gmail',
@@ -18,4 +18,23 @@ sendEmail = async function (emailAccount, message) {
   };
   const mail = await smtpTransport.sendMail(mailOptions);
 };
-module.exports = sendEmail;
+
+const sendConfirmationEmail = async function (emailAccount, message) {
+  const to = emailAccount;
+  const smtpTransport = nodemailer.createTransport({
+    service: 'Gmail',
+    auth: {
+      user: process.env.NODEMAILER_MAIL,
+      pass: process.env.NODEMAILER_PASSWORD,
+    },
+  });
+  const mailOptions = {
+    from: '"Recoded Capstone" <capstonecats@gmail.com>',
+    to: to,
+    subject: 'Email Confirmation Mail',
+    text: `To confirm your email, please go to the link: ${message}`,
+  };
+  const mail = await smtpTransport.sendMail(mailOptions);
+};
+
+module.exports = { sendEmail, sendConfirmationEmail };

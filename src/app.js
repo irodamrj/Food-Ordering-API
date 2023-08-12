@@ -26,7 +26,8 @@ const orderRoute = require('./routes/orders');
 const adminRoute = require('./routes/admin');
 const cookerRoute = require('./routes/cookers');
 const publicRoute = require('./routes/public');
-
+const customerConfirmation = require('./routes/customerConfirmation');
+const cookerConfirmation = require('./routes/cookerConfirmation');
 db.connect();
 
 //Swagger middleware
@@ -69,7 +70,7 @@ app.use(
   })
 );
 app.use(function (err, req, res, next) {
-  console.log(`test ${req.originalUrl}`)
+  console.log(`test ${req.originalUrl}`);
 
   if (err.name === 'UnauthorizedError') {
     if (req.originalUrl.includes('admin')) {
@@ -93,8 +94,11 @@ app.use('/api/admin', adminAuth, adminRoute);
 app.use('/api/cooker', cookerAuth, cookerRoute);
 app.use('/api/customer/order', customerAuth, orderRoute);
 app.use('/home', publicRoute);
+app.use('/customer', customerConfirmation);
+app.use('/cooker', cookerConfirmation);
 
 app.use(notFoundMiddleware);
+app.use(errorHandlerMiddleware);
 
 const port = 5000;
 

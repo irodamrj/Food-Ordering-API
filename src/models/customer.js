@@ -34,6 +34,9 @@ const customerSchema = new Schema({
       'Please provide valid email',
     ],
   },
+  emailToken: {
+    type: String,
+  },
   password: {
     type: String,
     minlength: 6,
@@ -58,6 +61,12 @@ const customerSchema = new Schema({
   address: {
     type: Schema.Types.ObjectId,
     ref: `Address`,
+  },
+
+  isEmailApproved: {
+    type: Boolean,
+    default: false,
+    required: true,
   },
 });
 
