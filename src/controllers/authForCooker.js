@@ -3,8 +3,9 @@ const { attachCookiesToResponse } = require('../utils/jwt');
 const { StatusCodes } = require('http-status-codes');
 const CustomError = require('../errors');
 const Cooker = require('../models/cooker');
-const sendEmail = require('../utils/sendEmail');
+const { sendEmail, sendConfirmationEmail } = require('../utils/sendEmail');
 const { createCookerToken } = require('../utils/createToken');
+const { createMailToken } = require('../utils/createMailToken');
 const Adress = require('../models/address');
 
 const signup = async (req, res) => {
@@ -32,7 +33,7 @@ const signup = async (req, res) => {
   const hashed = await bcrypt.hash(password, 10);
 
   const addressObject = await Adress.create(address);
-
+  const token = createMailToken();
   const cooker = await Cooker.create({
     email: email,
     address: addressObject._id,
@@ -42,12 +43,17 @@ const signup = async (req, res) => {
     aboutCooker: aboutCooker,
     openingHour: openingHour,
     closingHour: closingHour,
+    emailToken: token,
   });
 
   const payload = createCookerToken(cooker);
   attachCookiesToResponse(res, payload);
+  const message = `http://localhost:5000/cooker/emailconfirmation?token=${token}`;
+  sendConfirmationEmail(email, message);
   sendEmail(email, 'cooker');
-  return res.status(StatusCodes.CREATED).json({ cooker });
+  return res
+    .status(StatusCodes.CREATED)
+    .json('Cooker account created. Confirm your email.');
 };
 
 const login = async (req, res) => {

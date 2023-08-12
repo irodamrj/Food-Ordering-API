@@ -55,6 +55,14 @@ const cookerSchema = new Schema({
     default: 'Pending',
     required: true,
   },
+  isEmailApproved: {
+    type: Boolean,
+    default: false,
+    required: true,
+  },
+  emailToken: {
+    type: String,
+  },
   paymentType: [
     {
       type: String,

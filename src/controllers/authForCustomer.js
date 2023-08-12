@@ -5,7 +5,8 @@ const CustomError = require('../errors');
 const Customer = require('../models/customer');
 const bcrypt = require('bcryptjs');
 const { createUserToken } = require('../utils/createToken');
-const sendEmail = require('../utils/sendEmail');
+const { createMailToken } = require('../utils/createMailToken');
+const { sendEmail, sendConfirmationEmail } = require('../utils/sendEmail');
 
 //local signup
 const signup = async (req, res) => {
@@ -22,17 +23,24 @@ const signup = async (req, res) => {
   }
 
   const hashed = await bcrypt.hash(password, 10);
-
+  const emailToken = createMailToken();
   const customer = await Customer.create({
     firstName: firstName,
     lastName: lastName,
     email: email,
     password: hashed,
+    emailToken: emailToken,
   });
   const payload = createUserToken(customer);
   attachCookiesToResponse(res, payload);
   sendEmail(email, 'customer');
-  return res.status(StatusCodes.CREATED).json({ customer });
+
+  const message = `http://localhost:5000/customer/emailconfirmation?token=${emailToken}`;
+  sendConfirmationEmail(email, message);
+
+  return res
+    .status(StatusCodes.CREATED)
+    .json('Customer account created. Confirm your email.');
 };
 
 const login = async (req, res) => {
