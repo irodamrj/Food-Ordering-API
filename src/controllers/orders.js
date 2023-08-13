@@ -45,6 +45,12 @@ const createOrder = async (req, res) => {
     email: req.auth.email,
   });
 
+  if (!customer.isEmailApproved) {
+    throw new CustomError.BadRequestError(
+      'Before giving an order, confirm your email address'
+    );
+  }
+
   const cartItemIds = customer.cart.itemId;
 
   if (!cartItemIds || cartItemIds.length < 1) {

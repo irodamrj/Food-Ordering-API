@@ -15,11 +15,11 @@ const cookerAuth = async (req, res, next) => {
 
 const isCookerApproved = async (req, res, next) => {
   const cooker = await Cooker.findOne({ email: req.auth.email });
-  if (cooker.status === 'Approved') {
+  if (cooker.status === 'Approved' && cooker.isEmailApproved) {
     next();
   } else {
     throw new CustomError.UnauthorizedError(
-      'You are not authorized to reach this endpoint, please add a payment type "card" to make your account approved'
+      'You are not authorized to reach this endpoint, please add a payment type "card" or confirm your email to make your account approved'
     );
   }
 };
